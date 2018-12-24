@@ -12,6 +12,7 @@ export default class Calculator extends Component {
                 AS: ["-","+"],
                 equation:"",
                 currentNumber: "",
+                decimal: ".",
                 moved: 0,
                 numbers: [],
                 nonNumbers: []
@@ -24,14 +25,14 @@ export default class Calculator extends Component {
 
     handleInput = (e) =>{
         if(isNaN(e.currentTarget.value) && 
-        (this.state.openP === e.currentTarget.value ||
+        (this.state.decimal !== e.currentTarget.value ||
+         this.state.openP === e.currentTarget.value ||
          this.state.closeP === e.currentTarget.value || 
         this.state.MD.includes(e.currentTarget.value) ||
         this.state.AS.includes(e.currentTarget.value))){
             
             this.setState({
                 equation: this.state.equation + e.currentTarget.value,
-                numbers: [...this.state.numbers, this.state.currentNumber],
                 nonNumbers: [...this.state.nonNumbers, e.currentTarget.value]
             })
             this.NewNumber()
@@ -51,9 +52,10 @@ export default class Calculator extends Component {
     }
 
     handleTypeInput = (e) =>{
-        this.setState({
-            equation: e.currentTarget.value
-        })
+        // this.setState({
+        //     equation: e.currentTarget.value
+        // })
+        console.log()
     }
 
     NewNumber = async() => {
@@ -95,19 +97,15 @@ export default class Calculator extends Component {
       for(let element = 0; element < MDIndex.length; element++){
         if(element !== 0){
             zero++;
-        } 
-        //console.log('happens')
-       // console.log(this.state.nonNumbers[0], this.state.nonNumbers[MDIndex[element]])
-        if("*" === this.state.nonNumbers[MDIndex[element]]){
-            let value = this.state.numbers[MDIndex[element] - zero ] * this.state.numbers[MDIndex[element] - zero + 1]
-            //console.log(value)
-            console.log(MDIndex[zero])
+        }
 
+        if("*" === this.state.nonNumbers[MDIndex[element]]){
+            let value = this.state.numbers[MDIndex[element] - element ] * this.state.numbers[MDIndex[element] - element + 1]
             const results = await this.state.numbers.filter( number => 
-                number !== this.state.numbers[MDIndex[zero] - zero + 1] && number !== this.state.numbers[MDIndex[zero] - zero]
+                number !== this.state.numbers[MDIndex[element] - element + 1] && number !== this.state.numbers[MDIndex[element] - element]
                 )
             if(results.length > 0){
-                await results.splice(MDIndex[zero]- zero, 0, value);
+                await results.splice(MDIndex[element]- element, 0, value);
                 await this.setState({
                     numbers: results
                 })
@@ -121,12 +119,12 @@ export default class Calculator extends Component {
         }
        
         if("/" === this.state.nonNumbers[MDIndex[element]]){
-            let value = this.state.numbers[MDIndex[element] - zero ] / this.state.numbers[MDIndex[element] - zero + 1]
+            let value = this.state.numbers[MDIndex[element] - element ] / this.state.numbers[MDIndex[element] - element + 1]
             let results = await this.state.numbers.filter( number => 
-                number !== this.state.numbers[MDIndex[element] - zero + 1] && number !== this.state.numbers[MDIndex[element] - zero]
+                number !== this.state.numbers[MDIndex[element] - element + 1] && number !== this.state.numbers[MDIndex[element] - element]
             )
             if(results.length > 0){
-                await results.splice(MDIndex[element]- zero, 0, value);
+                await results.splice(MDIndex[element]- element, 0, value);
                 await this.setState({
                     numbers: results
                 })
@@ -140,12 +138,12 @@ export default class Calculator extends Component {
         }
 
         if("%" === this.state.nonNumbers[MDIndex[element]]){
-            let value = this.state.numbers[MDIndex[element] - zero ] % this.state.numbers[MDIndex[element] - zero + 1]
-            const results = await this.state.numbers.filter( number => 
-                number !== this.state.numbers[MDIndex[element] - zero + 1] && number !== this.state.numbers[MDIndex[element] - zero]
+            let value = this.state.numbers[MDIndex[element] - element ] % this.state.numbers[MDIndex[element] - element + 1]
+            let results = await this.state.numbers.filter( number => 
+                number !== this.state.numbers[MDIndex[element] - element + 1] && number !== this.state.numbers[MDIndex[element] - element]
             )
             if(results.length > 0){
-                await results.splice(MDIndex[element]- zero, 0, value);
+                await results.splice(MDIndex[element]- element, 0, value);
                 await this.setState({
                     numbers: results
                 })
