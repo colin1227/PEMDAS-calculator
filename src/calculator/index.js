@@ -12,6 +12,7 @@ export default class Calculator extends Component {
                 AS: ["-","+"],
                 equation:"",
                 currentNumber: "",
+                moved: 0,
                 numbers: [],
                 nonNumbers: []
         }
@@ -30,7 +31,7 @@ export default class Calculator extends Component {
             
             this.setState({
                 equation: this.state.equation + e.currentTarget.value,
-                numbers: [... this.state.numbers, this.state.currentNumber],
+                numbers: [...this.state.numbers, this.state.currentNumber],
                 nonNumbers: [...this.state.nonNumbers, e.currentTarget.value]
             })
             this.NewNumber()
@@ -44,7 +45,7 @@ export default class Calculator extends Component {
         else{
             this.setState({
                 equation: this.state.equation + e.currentTarget.value,
-                currentNumber: e.currentTarget.value
+                currentNumber: this.state.currentNumber + e.currentTarget.value
             })
         }
     }
@@ -58,7 +59,7 @@ export default class Calculator extends Component {
     NewNumber = async() => {
         try{
            await this.setState({
-             numbers: [...this.state.numbers, parseInt(this.state.currentNumber)],
+             numbers: [...this.state.numbers, parseFloat(this.state.currentNumber)],
              currentNumber: ""
            })
         }
@@ -69,130 +70,101 @@ export default class Calculator extends Component {
 
     solve = async() => {
         try{
-        await this.setState({
-            numbers: [...this.state.numbers, parseInt(this.state.currentNumber)],
-            currentNumber: ""
-        })
+            await this.setState({
+                numbers: [...this.state.numbers, parseFloat(this.state.currentNumber)],
+                currentNumber: ""
+            })
 
-        let MDIndex = [];
-        let ASIndex = [];
-        this.state.nonNumbers.forEach(async(element, i)=>{
-            try{
-                if(element === "*" || element === "/" || element === "%" ){
-                    MDIndex.push(i)
+            let MDIndex = [];
+            let ASIndex = [];
+            let zero = 0;
+            this.state.nonNumbers.forEach(async(element, i)=>{
+                try{
+                    if(element === "*" || element === "/" || element === "%" ){
+                        MDIndex.push(i)
+                    }
+                    else if(element === "+" || element === "-"){
+                        ASIndex.push(i)
+                    }  
                 }
-                else if(element === "+" || element === "-"){
-                    ASIndex.push(i)
-                }  
-                else{
-
+                catch(err){
+                    console.log("error nonNumbers")
                 }
-            }
-            catch(err){
-                console.log("error nonNumbers")
-            }
-        })
-       // console.log("MDIndex", MDIndex)
+            })
        // console.log("ASIndex", ASIndex)
+      for(let element = 0; element < MDIndex.length; element++){
+        if(element !== 0){
+            zero++;
+        } 
+        //console.log('happens')
+       // console.log(this.state.nonNumbers[0], this.state.nonNumbers[MDIndex[element]])
+        if("*" === this.state.nonNumbers[MDIndex[element]]){
+            let value = this.state.numbers[MDIndex[element] - zero ] * this.state.numbers[MDIndex[element] - zero + 1]
+            //console.log(value)
+            console.log(MDIndex[zero])
 
-       await MDIndex.forEach(async(element, i)=>{
-          try{
-              if("*" === this.state.nonNumbers[element]){
-                  let value = this.state.numbers[element] * this.state.numbers[element + 1]
-                 
-                  //console.log(typeof this.state.numbers[i],typeof this.state.numbers[i+1])
-                  const results = await this.state.numbers.filter( number => 
-                      number !== this.state.numbers[element] 
+            const results = await this.state.numbers.filter( number => 
+                number !== this.state.numbers[MDIndex[zero] - zero + 1] && number !== this.state.numbers[MDIndex[zero] - zero]
                 )
-                  
-                  console.log(results)
-                  
-                  if(this.state.numbers.length > 0){
-                    await this.setState({
-                        numbers: results.splice(element + 1, 0, value)
-                    })
-                  }
-                  else{
-                    await this.setState({
-                        numbers: results.push(value)
-                    })
-                  }
-                  //console.log(value)
-                  console.log(this.state.numbers)
-              }
-
-              else if("/" === this.state.nonNumbers[element]){
-                  let value = this.state.numbers[i] / this.state.numbers[i + 1]
-                  this.setState({
-                      numbers: this.state.numbers.filter( number => 
-                          number !== this.state.numbers[i] || number !== this.state.numbers[i + 1]
-                      )
-                  })
-                  console.log(this.state.numbers)
-                  this.setState({
-                      numbers: this.state.numbers.splice(i, 0, value)
-                  })
-              }
-
-              else if("%" === this.state.nonNumbers[element]){
-                  let value = this.state.numbers[i] % this.state.numbers[i + 1]
-                  this.setState({
-                      numbers: this.state.numbers.filter( number => 
-                          number !== this.state.numbers[i] || number !== this.state.numbers[i + 1]
-                      )
-                  })
-                  console.log(this.state.numbers)
-                  this.setState({
-                      numbers: this.state.numbers.splice(i, 0, value)
-                  })
-              }
-              else{
-                  return true;
-              }
+            if(results.length > 0){
+                await results.splice(MDIndex[zero]- zero, 0, value);
+                await this.setState({
+                    numbers: results
+                })
             }
-            catch(err){
-                console.log("error MD")
+            else{
+                await results.push(value)
+                await this.setState({
+                    numbers: results
+                })
             }
-        })
-
-       await ASIndex.forEach(async(element, i)=>{
-            try{
-                if("+" === this.state.nonNumbers[element]){
-                    let value = this.state.numbers[i] + this.state.numbers[i + 1]
-                    await this.setState({
-                        numbers: this.state.numbers.filter( number => 
-                            number !== this.state.numbers[i] || number !== this.state.numbers[i + 1]
-                        )
-                    })
-                    await this.setState({
-                        numbers: this.state.numbers.splice(i, 0, value)
-                    })
-                }
-
-                else if("-" === this.state.nonNumbers[element]){
-                    let value = this.state.numbers[i] - this.state.numbers[i + 1]
-                    await this.setState({
-                        numbers: this.state.numbers.filter( number => 
-                            number !== this.state.numbers[i] || number !== this.state.numbers[i + 1]
-                        )
-                    })
-                    await this.setState({
-                        numbers: this.state.numbers.splice(i, 0, value)
-                    })
-                }
-                else{
-                    return true;
-                }
-
-            }
-            catch(err){
-                console.log("err AS")
-            }
-        })
-       // console.log(this.state.numbers)
         }
+       
+        if("/" === this.state.nonNumbers[MDIndex[element]]){
+            let value = this.state.numbers[MDIndex[element] - zero ] / this.state.numbers[MDIndex[element] - zero + 1]
+            let results = await this.state.numbers.filter( number => 
+                number !== this.state.numbers[MDIndex[element] - zero + 1] && number !== this.state.numbers[MDIndex[element] - zero]
+            )
+            if(results.length > 0){
+                await results.splice(MDIndex[element]- zero, 0, value);
+                await this.setState({
+                    numbers: results
+                })
+            }
+            else{
+                await results.push(value)
+                await this.setState({
+                    numbers: [...results]
+                })
+            }
+        }
+
+        if("%" === this.state.nonNumbers[MDIndex[element]]){
+            let value = this.state.numbers[MDIndex[element] - zero ] % this.state.numbers[MDIndex[element] - zero + 1]
+            const results = await this.state.numbers.filter( number => 
+                number !== this.state.numbers[MDIndex[element] - zero + 1] && number !== this.state.numbers[MDIndex[element] - zero]
+            )
+            if(results.length > 0){
+                await results.splice(MDIndex[element]- zero, 0, value);
+                await this.setState({
+                    numbers: results
+                })
+            }
+            else{
+                await results.push(value)
+                await this.setState({
+                    numbers: [...results]
+                })
+            }
+        }
+      }
+    
+        await this.setState({
+            equation: this.state.numbers
+        })
+         }
         catch(err){
-            console.log("err on Solve")
+            console.log(err)
         }
 
     }
@@ -200,6 +172,7 @@ export default class Calculator extends Component {
     render() {
         return(
             <div>
+                <h2>moved: {this.state.moved}</h2>
                 <b>numbers: {this.state.numbers}</b>
                 <b> current number: {this.state.currentNumber}</b>
                 <Form>
