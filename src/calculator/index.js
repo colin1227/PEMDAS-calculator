@@ -17,6 +17,7 @@ export default class Calculator extends Component {
                 numbers: [],
                 nonNumbers: []
         }
+        this.preSolve = this.preSolve.bind(this);
         this.handleInput = this.handleInput.bind(this);
         this.handleTypeInput = this.handleTypeInput.bind(this);
         this.solve = this.solve.bind(this);
@@ -69,95 +70,156 @@ export default class Calculator extends Component {
         console.log(err)
     }
     }
-
-    solve = async() => {
+    preSolve = async() =>{
         try{
             await this.setState({
                 numbers: [...this.state.numbers, parseFloat(this.state.currentNumber)],
                 currentNumber: ""
             })
-
-            let MDIndex = [];
-            let ASIndex = [];
-            let zero = 0;
-            this.state.nonNumbers.forEach(async(element, i)=>{
-                try{
-                    if(element === "*" || element === "/" || element === "%" ){
-                        MDIndex.push(i)
-                    }
-                    else if(element === "+" || element === "-"){
-                        ASIndex.push(i)
-                    }  
-                }
-                catch(err){
-                    console.log("error nonNumbers")
-                }
-            })
-       // console.log("ASIndex", ASIndex)
-      for(let element = 0; element < MDIndex.length; element++){
-        if(element !== 0){
-            zero++;
+            this.solve()
         }
+        catch(err){
+            console.log(err)
+        }
+    }
+    solve = async() => {
+        try{
+            let ASIndex = [];
+            
+            this.state.nonNumbers.forEach((element, i) =>{
+                if(element === "+"|| element === "-"){
+                    ASIndex.push(i)
+                }
+            });
+            let val = this.state.nonNumbers.length;
+      for(let index = 0; index < val; index++){
+        let moved = 0;
+        let more = this.state.nonNumbers.includes("+") || this.state.nonNumbers.includes("-")
 
-        if("*" === this.state.nonNumbers[MDIndex[element]]){
-            let value = this.state.numbers[MDIndex[element] - element ] * this.state.numbers[MDIndex[element] - element + 1]
-            const results = await this.state.numbers.filter( number => 
-                number !== this.state.numbers[MDIndex[element] - element + 1] && number !== this.state.numbers[MDIndex[element] - element]
+        if("*" === this.state.nonNumbers[0 + moved] ){
+            let value = this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved])] * this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved])+ 1]
+            let results = await this.state.numbers.filter( number => 
+                number !== this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved]) + 1] && number !== this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved])]
                 )
             if(results.length > 0){
-                await results.splice(MDIndex[element]- element, 0, value);
+                await results.splice(this.state.nonNumbers.indexOf(this.state.nonNumbers[index]) - index, 0, value);
+                let newNons = this.state.nonNumbers.shift()
                 await this.setState({
-                    numbers: results
+                    numbers: [...results],
+                    nonNumbers: [...newNons]
                 })
             }
             else{
+                let newNons = await this.state.nonNumbers.shift()
                 await results.push(value)
                 await this.setState({
-                    numbers: results
+                    numbers: results,
+                    nonNumbers: [...newNons]
                 })
             }
         }
        
-        if("/" === this.state.nonNumbers[MDIndex[element]]){
-            let value = this.state.numbers[MDIndex[element] - element ] / this.state.numbers[MDIndex[element] - element + 1]
+        else if("/" === this.state.nonNumbers[this.state.nonNumbers[0 + moved]]){
+            let value = this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved])] / this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved]) + 1]
             let results = await this.state.numbers.filter( number => 
-                number !== this.state.numbers[MDIndex[element] - element + 1] && number !== this.state.numbers[MDIndex[element] - element]
+                number !== this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved]) + 1] && number !== this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved])]
             )
             if(results.length > 0){
-                await results.splice(MDIndex[element]- element, 0, value);
+                await results.splice(this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved]), 0, value);
                 await this.setState({
-                    numbers: results
+                    numbers: [...results],
+                    nonNumbers: this.state.nonNumbers.shift()
                 })
             }
             else{
                 await results.push(value)
                 await this.setState({
-                    numbers: [...results]
+                    numbers: results,
+                    nonNumbers: this.state.nonNumbers.shift()
                 })
             }
         }
 
-        if("%" === this.state.nonNumbers[MDIndex[element]]){
-            let value = this.state.numbers[MDIndex[element] - element ] % this.state.numbers[MDIndex[element] - element + 1]
+        else if("%" === this.state.nonNumbers[this.state.nonNumbers[0 + moved]]){
+            let value = this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved])] % this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved]) + 1]
             let results = await this.state.numbers.filter( number => 
-                number !== this.state.numbers[MDIndex[element] - element + 1] && number !== this.state.numbers[MDIndex[element] - element]
+                number !== this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved]) + 1] && number !== this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved])]
             )
             if(results.length > 0){
-                await results.splice(MDIndex[element]- element, 0, value);
+                await results.splice(this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved]), 0, value);
                 await this.setState({
-                    numbers: results
+                    numbers: [...results],
+                    nonNumbers: this.state.nonNumbers.shift()
                 })
             }
             else{
                 await results.push(value)
                 await this.setState({
-                    numbers: [...results]
+                    numbers: results,
+                    nonNumbers: this.state.nonNumbers.shift()
                 })
             }
         }
+
+        if("+" === this.state.nonNumbers[this.state.nonNumbers[index]] && (more === false) || ASIndex.length - this.state.nonNumbers.length <= 0){
+            let value = this.state.numbers[this.state.nonNumbers[index + index ]] + this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[index]) - index + 1]
+            let results = await this.state.numbers.filter( number => 
+                number !== this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[index]) - index + 1] && number !== this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[index]) - index]
+                )
+            if(results.length > 0){
+                await results.splice(this.state.nonNumbers.indexOf(this.state.nonNumbers[index]) - index, 0, value);
+                await this.setState({
+                    numbers: [...results],
+                    nonNumbers: this.state.nonNumbers.shift()
+                })
+                this.solve();
+            }
+            else{
+                await results.push(value)
+                await this.setState({
+                    numbers: [...results],
+                    nonNumbers: this.state.nonNumbers.shift()
+                })
+            }
+        }
+       
+        else if("-" === this.state.nonNumbers[this.state.nonNumbers[index]] && ASIndex.length - this.state.nonNumbers.length <= 0){
+            let value = this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[index]) - index] - this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[index]) - index + 1]
+            let results = await this.state.numbers.filter( number => 
+                number !== this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[index]) - index + 1] && number !== this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[index]) - index]
+            )
+            if(results.length > 0){
+                await results.splice(this.state.nonNumbers.indexOf(this.state.nonNumbers[index]) - index, 0, value);
+                await this.setState({
+                    numbers: [...results],
+                    nonNumbers: this.state.nonNumbers.shift()
+                })
+            }
+            else{
+                await results.push(value)
+                await this.setState({
+                    numbers: [...results],
+                    nonNumbers: this.state.nonNumbers.shift()
+                })
+            }
+        }
+        if(more === true){
+            console.log("else")
+            moved++;
+            index++;
+        }
+        // if(this.state.nonNumbers.length < 1){
+        //     console.log("fdsafdsa")
+        //     return true;
+            
+        // }
       }
+    //   if(this.state.nonNumbers.length >= 1){
+    //     console.log("asdfasdf")
+    //   }
+
     
-        await this.setState({
+       return await this.setState({
             equation: this.state.numbers
         })
          }
@@ -170,14 +232,14 @@ export default class Calculator extends Component {
     render() {
         return(
             <div>
-                <h2>moved: {this.state.moved}</h2>
+                <h2>index: {this.state.moved}</h2>
                 <b>numbers: {this.state.numbers}</b>
                 <b> current number: {this.state.currentNumber}</b>
                 <Form>
                   <Form.Input onChange={this.handleTypeInput} value={this.state.equation} type="text"/>
                     <Grid columns={4}>
                       <Grid.Row>
-                          <Button value="=" onClick={this.solve}>=</Button>
+                          <Button value="=" onClick={this.preSolve}>=</Button>
                       </Grid.Row>
                       <Grid.Row>
                       <Button value="9" onClick={this.handleInput}>9</Button>
