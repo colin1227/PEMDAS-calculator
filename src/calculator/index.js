@@ -92,29 +92,25 @@ export default class Calculator extends Component {
                 }
             });
             let val = this.state.nonNumbers.length;
-            for(let index = 0; index < val; index++){
             let moved = 0;
-            let more = this.state.nonNumbers.includes("*") || this.state.nonNumbers.includes("/") || this.state.nonNumbers.includes("%")
-
+            for(let index = 0; index < val; index++){            
+                let more = this.state.nonNumbers.includes("*") || this.state.nonNumbers.includes("/") || this.state.nonNumbers.includes("%")
                 if("*" === this.state.nonNumbers[0 + moved] ){
                     let value = this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved])] * this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved])+ 1]
                     let results = await this.state.numbers.filter( number => 
                         number !== this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved]) + 1] && number !== this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved])]
                     )
+                    await this.state.nonNumbers.shift()
                     if(results.length > 0){
                         await results.splice(this.state.nonNumbers.indexOf(this.state.nonNumbers[index]) - index, 0, value);
-                        let newNons = this.state.nonNumbers.shift()
                         await this.setState({
-                            numbers: [...results],
-                            nonNumbers: [...newNons]
+                            numbers: [...results]
                         })
                     }
                     else{
-                        let newNons = await this.state.nonNumbers.shift()
                         await results.push(value)
                         await this.setState({
-                            numbers: results,
-                            nonNumbers: [...newNons]
+                            numbers: [...results]
                         })
                     }
                 }
@@ -124,45 +120,41 @@ export default class Calculator extends Component {
                     let results = await this.state.numbers.filter( number => 
                         number !== this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved]) + 1] && number !== this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved])]
                     )
+                    await this.state.nonNumbers.shift()
                     if(results.length > 0){
                         await results.splice(this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved]), 0, value);
                         await this.setState({
-                            numbers: [...results],
-                            nonNumbers: this.state.nonNumbers.shift()
+                            numbers: [...results]
                         })
                     }
                     else{
                         await results.push(value)
                         await this.setState({
-                            numbers: results,
-                            nonNumbers: this.state.nonNumbers.shift()
+                            numbers: [...results]
                         })
                     }
                 }
 
                 else if("%" === this.state.nonNumbers[0 + moved]){
                     let value = this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved])] % this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved]) + 1]
-                    console.log(value)
                     let results = await this.state.numbers.filter( number => 
                         number !== this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved]) + 1] && number !== this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved])]
                     )
+                    await this.state.nonNumbers.shift()
                     if(results.length > 0){
                         await results.splice(this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved]), 0, value);
                         await this.setState({
-                            numbers: [...results],
-                            nonNumbers: this.state.nonNumbers.shift()
+                            numbers: [...results]
                         })
                     }
                     else{
                         await results.push(value)
                         await this.setState({
-                            numbers: results,
-                            nonNumbers: this.state.nonNumbers.shift()
+                            numbers: [...results]
                         })
                     }
                 }
-                else{
-                    console.log("asdf")
+                else if(more === false){
                     moved++;
                 }
             }
@@ -176,18 +168,17 @@ export default class Calculator extends Component {
                     let results = await this.state.numbers.filter( number => 
                         number !== this.state.numbers[1] && number !== this.state.numbers[0]
                     )
+                    await this.state.nonNumbers.shift()
                     if(results.length > 0){
                         await results.splice(0, 0, value);
                         await this.setState({
-                            numbers: [...results],
-                            nonNumbers: this.state.nonNumbers.shift()
+                            numbers: [...results]
                         })
                     }
                     else{
                         await results.push(value)
                         await this.setState({
-                            numbers: [...results],
-                            nonNumbers: this.state.nonNumbers.shift()
+                            numbers: [...results]
                         })
                     }
                 }
@@ -197,29 +188,29 @@ export default class Calculator extends Component {
                     let results = await this.state.numbers.filter( number => 
                         number !== this.state.numbers[1] && number !== this.state.numbers[0]
                     )
+                    await this.state.nonNumbers.shift()
                     if(results.length > 0){
                         await results.splice(0, 0, value);
                         await this.setState({
-                            numbers: [...results],
-                            nonNumbers: this.state.nonNumbers.shift()
+                            numbers: [...results]
                         })
                     }
                     else{
                         await results.push(value)
                         await this.setState({
-                            numbers: [...results],
-                            nonNumbers: this.state.nonNumbers.shift()
+                            numbers: [...results]
                         })
                     }
                 }
             }
 
             return await this.setState({
-                equation: this.state.numbers
+                equation: this.state.numbers,
+                currentNumber: this.state.numbers
             })
         }
         catch(err){
-            console.log("error on solve")
+            console.log(err)
         }
 
     }
@@ -227,7 +218,6 @@ export default class Calculator extends Component {
     render() {
         return(
             <div>
-                <h2>index: {this.state.moved}</h2>
                 <b>numbers: {this.state.numbers}</b>
                 <b> current number: {this.state.currentNumber}</b>
                 <Form>
