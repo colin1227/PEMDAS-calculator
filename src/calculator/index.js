@@ -13,7 +13,6 @@ export default class Calculator extends Component {
                 equation:"",
                 currentNumber: "",
                 decimal: ".",
-                moved: 0,
                 numbers: [],
                 nonNumbers: []
         }
@@ -25,12 +24,10 @@ export default class Calculator extends Component {
     }
 
     handleInput = (e) =>{
+        console.log(e.currentTarget.value)
         if(isNaN(e.currentTarget.value) && 
-        (this.state.decimal !== e.currentTarget.value ||
-         this.state.openP === e.currentTarget.value ||
-         this.state.closeP === e.currentTarget.value || 
         this.state.MD.includes(e.currentTarget.value) ||
-        this.state.AS.includes(e.currentTarget.value))){
+        this.state.AS.includes(e.currentTarget.value) ){
             
             this.setState({
                 equation: this.state.equation + e.currentTarget.value,
@@ -38,6 +35,7 @@ export default class Calculator extends Component {
             })
             this.NewNumber()
         } 
+
         else if(isNaN(e.currentTarget.value) && 
         (this.state.P.includes(e.currentTarget.value) === false || 
         this.state.MD.includes(e.currentTarget.value) === false ||
@@ -51,6 +49,14 @@ export default class Calculator extends Component {
             })
         }
     }
+    clear = () => {
+       this.setState({
+           equation: "",
+           currentNumber: "",
+           numbers: [],
+           nonNumbers: []
+       })
+    }
 
     handleTypeInput = (e) =>{
         // this.setState({
@@ -59,6 +65,12 @@ export default class Calculator extends Component {
         console.log()
     }
 
+    addDecimal = (e) => {
+        this.setState({
+            currentNumber: this.state.currentNumber + ".",
+            equation: this.state.equation + "."
+        })
+    }
     NewNumber = async() => {
         try{
            await this.setState({
@@ -95,6 +107,7 @@ export default class Calculator extends Component {
             let moved = 0;
             for(let index = 0; index < val; index++){            
                 let more = this.state.nonNumbers.includes("*") || this.state.nonNumbers.includes("/") || this.state.nonNumbers.includes("%")
+                
                 if("*" === this.state.nonNumbers[0 + moved] ){
                     let value = this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved])] * this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved])+ 1]
                     let results = await this.state.numbers.filter( number => 
@@ -206,7 +219,8 @@ export default class Calculator extends Component {
 
             return await this.setState({
                 equation: this.state.numbers,
-                currentNumber: this.state.numbers
+                currentNumber: this.state.numbers,
+                numbers: []
             })
         }
         catch(err){
@@ -225,6 +239,8 @@ export default class Calculator extends Component {
                     <Grid columns={4}>
                       <Grid.Row>
                           <Button value="=" onClick={this.preSolve}>=</Button>
+                          <Button value="C" onClick={this.clear}>C</Button>
+
                       </Grid.Row>
                       <Grid.Row>
                       <Button value="9" onClick={this.handleInput}>9</Button>
@@ -246,7 +262,7 @@ export default class Calculator extends Component {
                       <Button value="*" onClick={this.handleInput}>*</Button>
                       </Grid.Row>
                       <Grid.Row>
-                      <Button value="." onClick={this.handleInput}>.</Button>
+                      <Button value="." onClick={this.addDecimal}>.</Button>
                       <Button value="0" onClick={this.handleInput}>0</Button>
                       <Button value="+" onClick={this.handleInput}>+</Button>
                       <Button value="-" onClick={this.handleInput}>-</Button>
