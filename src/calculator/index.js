@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import "./style.css"
 import { Form, Button, Grid } from "semantic-ui-react";
 
 export default class Calculator extends Component {
@@ -238,8 +239,8 @@ export default class Calculator extends Component {
                   <Form.Input onChange={this.handleTypeInput} value={this.state.equation} type="text"/>
                     <Grid columns={4}>
                       <Grid.Row>
-                          <Button value="=" onClick={this.preSolve}>=</Button>
-                          <Button value="C" onClick={this.clear}>C</Button>
+                          <Button value="=" onClick={this.preSolve} className="asdf">=</Button>
+                          <Button value="C" onClick={this.clear} className="asdf">C</Button>
 
                       </Grid.Row>
                       <Grid.Row>
