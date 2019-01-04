@@ -22,14 +22,17 @@ export default class Calculator extends Component {
         this.handleTypeInput = this.handleTypeInput.bind(this);
         this.solve = this.solve.bind(this);
         this.NewNumber = this.NewNumber.bind(this);
+        this.addDecimal = this.addDecimal.bind(this);
     }
 
+
     handleInput = (e) =>{
-        console.log(e.currentTarget.value)
-        if(isNaN(e.currentTarget.value) && 
+        let decIncluded = this.state.currentNumber.includes(".")
+        
+        if(isNaN(e.currentTarget.value) && (
         this.state.MD.includes(e.currentTarget.value) ||
-        this.state.AS.includes(e.currentTarget.value) ){
-            
+        this.state.AS.includes(e.currentTarget.value)) && this.state.currentNumber !== "" ){
+            console.log("1")
             this.setState({
                 equation: this.state.equation + e.currentTarget.value,
                 nonNumbers: [...this.state.nonNumbers, e.currentTarget.value]
@@ -37,34 +40,79 @@ export default class Calculator extends Component {
             this.NewNumber()
         } 
 
+        else if(e.currentTarget.value === "." && 
+        decIncluded === false){
+            console.log("2")
+            this.addDecimal()
+        }
+
         else if(isNaN(e.currentTarget.value) && 
-        (this.state.P.includes(e.currentTarget.value) === false || 
-        this.state.MD.includes(e.currentTarget.value) === false ||
-        this.state.AS.includes(e.currentTarget.value) === false)){
+        ((this.state.MD.includes(e.currentTarget.value) === false ||
+        this.state.AS.includes(e.currentTarget.value) === false) 
+          ||
+        (this.state.currentNumber === "" && 
+        (this.state.MD.includes(e.currentTarget.value) === true ||
+        this.state.AS.includes(e.currentTarget.value) === true)))){
+            console.log("3")
             return true;
         }
+
         else{
+            console.log("4")
             this.setState({
                 equation: this.state.equation + e.currentTarget.value,
                 currentNumber: this.state.currentNumber + e.currentTarget.value
             })
         }
     }
-    clear = () => {
-       this.setState({
-           equation: "",
-           currentNumber: "",
-           numbers: [],
-           nonNumbers: []
-       })
-    }
+    
 
     handleTypeInput = (e) =>{
-        // this.setState({
-        //     equation: e.currentTarget.value
-        // })
-        console.log()
+        // const decIncluded = this.state.currentNumber.includes(".")
+        // if(isNaN(e.currentTarget.value) && 
+        // (this.state.MD.includes(e.currentTarget.value) ||
+        // this.state.AS.includes(e.currentTarget.value))){
+            
+        //     this.setState({
+        //         equation: this.state.equation + e.currentTarget.value,
+        //         nonNumbers: [...this.state.nonNumbers, e.currentTarget.value]
+        //     })
+        //     this.NewNumber()
+        // } 
+
+        // else if(isNaN(e.currentTarget.value) && 
+        // ((this.state.P.includes(e.currentTarget.value) === false || 
+        // this.state.MD.includes(e.currentTarget.value) === false ||
+        // this.state.AS.includes(e.currentTarget.value) === false) 
+        //   ||
+        // (this.state.currentNumber === "" && 
+        // (this.state.MD.includes(e.currentTarget.value) === true ||
+        // this.state.AS.includes(e.currentTarget.value) === true)))){
+        //     return true;
+        // }
+        // else if(e.currentTarget.value === "." && 
+        // this.state.currentNumber !== "" &&
+        // decIncluded === false){
+        //     this.addDecimal()
+        // }
+        // else{
+        //     this.setState({
+        //         equation: e.currentTarget.value,
+        //         currentNumber: e.currentTarget.value
+        //     })
+        // }
     }
+
+
+    clear = () => {
+        this.setState({
+            equation: "",
+            currentNumber: "",
+            numbers: [],
+            nonNumbers: []
+        })
+     }
+
 
     addDecimal = (e) => {
         this.setState({
@@ -72,6 +120,8 @@ export default class Calculator extends Component {
             equation: this.state.equation + "."
         })
     }
+
+
     NewNumber = async() => {
         try{
            await this.setState({
@@ -80,9 +130,11 @@ export default class Calculator extends Component {
            })
         }
         catch(err){
-        console.log(err)
+            console.log(err)
+        }
     }
-    }
+
+
     preSolve = async() =>{
         try{
             await this.setState({
@@ -95,6 +147,8 @@ export default class Calculator extends Component {
             console.log(err)
         }
     }
+
+
     solve = async() => {
         try{
             let ASIndex = [];
@@ -263,7 +317,7 @@ export default class Calculator extends Component {
                       <Button value="*" onClick={this.handleInput}>*</Button>
                       </Grid.Row>
                       <Grid.Row>
-                      <Button value="." onClick={this.addDecimal}>.</Button>
+                      <Button value="." onClick={this.handleInput}>.</Button>
                       <Button value="0" onClick={this.handleInput}>0</Button>
                       <Button value="+" onClick={this.handleInput}>+</Button>
                       <Button value="-" onClick={this.handleInput}>-</Button>
