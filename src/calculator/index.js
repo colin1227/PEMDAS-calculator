@@ -15,7 +15,8 @@ export default class Calculator extends Component {
                 currentNumber: "",
                 decimal: ".",
                 numbers: [],
-                nonNumbers: []
+                nonNumbers: [],
+                exponentList: []
         }
         this.preSolve = this.preSolve.bind(this);
         this.handleInput = this.handleInput.bind(this);
@@ -30,9 +31,9 @@ export default class Calculator extends Component {
         let decIncluded = this.state.currentNumber.includes(".")
         
         if(isNaN(e.currentTarget.value) && (
-        this.state.MD.includes(e.currentTarget.value) ||
-        this.state.AS.includes(e.currentTarget.value)) && this.state.currentNumber !== "" ){
-            console.log("1")
+        (this.state.MD.includes(e.currentTarget.value) ||
+        this.state.AS.includes(e.currentTarget.value)) && 
+        (this.state.numbers.length - this.state.nonNumbers.length === 0))){
             this.setState({
                 equation: this.state.equation + e.currentTarget.value,
                 nonNumbers: [...this.state.nonNumbers, e.currentTarget.value]
@@ -42,7 +43,6 @@ export default class Calculator extends Component {
 
         else if(e.currentTarget.value === "." && 
         decIncluded === false){
-            console.log("2")
             this.addDecimal()
         }
 
@@ -52,13 +52,11 @@ export default class Calculator extends Component {
           ||
         (this.state.currentNumber === "" && 
         (this.state.MD.includes(e.currentTarget.value) === true ||
-        this.state.AS.includes(e.currentTarget.value) === true)))){
-            console.log("3")
+        this.state.AS.includes(e.currentTarget.value) === true))) ){
             return true;
         }
 
         else{
-            console.log("4")
             this.setState({
                 equation: this.state.equation + e.currentTarget.value,
                 currentNumber: this.state.currentNumber + e.currentTarget.value
@@ -113,6 +111,13 @@ export default class Calculator extends Component {
         })
      }
 
+     exponent = () =>{
+       this.NewNumber();
+        this.setState({
+        exponentList: [...this.state.exponentList, this.state.numbers.length - 1]
+       })
+     }
+
 
     addDecimal = (e) => {
         this.setState({
@@ -162,65 +167,37 @@ export default class Calculator extends Component {
             let moved = 0;
             for(let index = 0; index < val; index++){            
                 let more = this.state.nonNumbers.includes("*") || this.state.nonNumbers.includes("/") || this.state.nonNumbers.includes("%")
-                
+                let array = this.state.numbers;
                 if("*" === this.state.nonNumbers[0 + moved] ){
                     let value = this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved])] * this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved])+ 1]
-                    let results = await this.state.numbers.filter( number => 
-                        number !== this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved]) + 1] && number !== this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved])]
-                    )
+                    let removedIndex = await this.state.numbers.indexOf(this.state.numbers[moved], moved)
+                    await array.splice(removedIndex, 2, value)
                     await this.state.nonNumbers.shift()
-                    if(results.length > 0){
-                        await results.splice(this.state.nonNumbers.indexOf(this.state.nonNumbers[index]) - index, 0, value);
-                        await this.setState({
-                            numbers: [...results]
-                        })
-                    }
-                    else{
-                        await results.push(value)
-                        await this.setState({
-                            numbers: [...results]
-                        })
-                    }
+                    await this.setState({
+                        numbers: [...array]
+                    })
+                
+                    
                 }
        
                 else if("/" === this.state.nonNumbers[0 + moved]){
                     let value = this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved])] / this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved]) + 1]
-                    let results = await this.state.numbers.filter( number => 
-                        number !== this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved]) + 1] && number !== this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved])]
-                    )
+                    let removedIndex = await this.state.numbers.indexOf(this.state.numbers[moved], moved)
+                    await array.splice(removedIndex, 2, value)
                     await this.state.nonNumbers.shift()
-                    if(results.length > 0){
-                        await results.splice(this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved]), 0, value);
-                        await this.setState({
-                            numbers: [...results]
-                        })
-                    }
-                    else{
-                        await results.push(value)
-                        await this.setState({
-                            numbers: [...results]
-                        })
-                    }
+                    await this.setState({
+                        numbers: [...array]
+                    })
                 }
 
                 else if("%" === this.state.nonNumbers[0 + moved]){
                     let value = this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved])] % this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved]) + 1]
-                    let results = await this.state.numbers.filter( number => 
-                        number !== this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved]) + 1] && number !== this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved])]
-                    )
+                    let removedIndex = await this.state.numbers.indexOf(this.state.numbers[moved], moved)
+                    await array.splice(removedIndex, 2, value)
                     await this.state.nonNumbers.shift()
-                    if(results.length > 0){
-                        await results.splice(this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved]), 0, value);
-                        await this.setState({
-                            numbers: [...results]
-                        })
-                    }
-                    else{
-                        await results.push(value)
-                        await this.setState({
-                            numbers: [...results]
-                        })
-                    }
+                    await this.setState({
+                        numbers: [...array]
+                    })
                 }
                 else if(more === false){
                     moved++;
@@ -231,44 +208,23 @@ export default class Calculator extends Component {
             let val2 = this.state.nonNumbers.length;
             moved = 0;
             for(let index = 0; index < val2; index++){
+                let array = this.state.numbers;
                 if("+" === this.state.nonNumbers[0]){
                     let value = this.state.numbers[0] + this.state.numbers[1];
-                    let results = await this.state.numbers.filter( number => 
-                        number !== this.state.numbers[1] && number !== this.state.numbers[0]
-                    )
+                    await array.splice(0, 2, value)
                     await this.state.nonNumbers.shift()
-                    if(results.length > 0){
-                        await results.splice(0, 0, value);
-                        await this.setState({
-                            numbers: [...results]
-                        })
-                    }
-                    else{
-                        await results.push(value)
-                        await this.setState({
-                            numbers: [...results]
-                        })
-                    }
+                    await this.setState({
+                        numbers: [...array]
+                    })
                 }
        
                 else if("-" === this.state.nonNumbers[0]){
                     let value = this.state.numbers[0] - this.state.numbers[1]
-                    let results = await this.state.numbers.filter( number => 
-                        number !== this.state.numbers[1] && number !== this.state.numbers[0]
-                    )
+                    await array.splice(0, 2, value)
                     await this.state.nonNumbers.shift()
-                    if(results.length > 0){
-                        await results.splice(0, 0, value);
-                        await this.setState({
-                            numbers: [...results]
-                        })
-                    }
-                    else{
-                        await results.push(value)
-                        await this.setState({
-                            numbers: [...results]
-                        })
-                    }
+                    await this.setState({
+                        numbers: [...array]
+                    })
                 }
             }
 
@@ -295,7 +251,7 @@ export default class Calculator extends Component {
                       <Grid.Row>
                           <Button value="=" onClick={this.preSolve} className="asdf">=</Button>
                           <Button value="C" onClick={this.clear} className="asdf">C</Button>
-
+                          <Button value="x²" onClick={this.exponent}>x²</Button>
                       </Grid.Row>
                       <Grid.Row>
                       <Button value="9" onClick={this.handleInput}>9</Button>
