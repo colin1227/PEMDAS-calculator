@@ -33,7 +33,7 @@ export default class Calculator extends Component {
         if(isNaN(e.currentTarget.value) && (
         (this.state.MD.includes(e.currentTarget.value) ||
         this.state.AS.includes(e.currentTarget.value)) && 
-        (this.state.numbers.length - this.state.nonNumbers.length === 0))){
+        (this.state.numbers.length - this.state.nonNumbers.length >= 0))){
             this.setState({
                 equation: this.state.equation + e.currentTarget.value,
                 nonNumbers: [...this.state.nonNumbers, e.currentTarget.value]
@@ -111,11 +111,18 @@ export default class Calculator extends Component {
         })
      }
 
-     exponent = () =>{
-       this.NewNumber();
-        this.setState({
-        exponentList: [...this.state.exponentList, this.state.numbers.length - 1]
-       })
+     exponent = async() =>{
+        try{ 
+            this.setState({
+                exponentList: await [...this.state.exponentList, this.state.numbers.length],
+                equation: this.state.equation + "²"
+            })
+            console.log(this.state.exponentList)
+            this.NewNumber();
+        }
+        catch(err){
+            console.log(err)
+        }
      }
 
 
@@ -129,8 +136,8 @@ export default class Calculator extends Component {
 
     NewNumber = async() => {
         try{
-           await this.setState({
-             numbers: [...this.state.numbers, parseFloat(this.state.currentNumber)],
+           this.setState({
+             numbers: await [...this.state.numbers, parseFloat(this.state.currentNumber)],
              currentNumber: ""
            })
         }
@@ -156,15 +163,28 @@ export default class Calculator extends Component {
 
     solve = async() => {
         try{
-            let ASIndex = [];
-            
-            this.state.nonNumbers.forEach((element, i) =>{
-                if(element === "+"|| element === "-"){
-                    ASIndex.push(i)
+            for(let index = 0; index < this.state.exponentList.length; index++){
+                try{
+                    let newNum = this.state.numbers[this.state.exponentList[index]] ** 2
+                    let newNumArray = this.state.numbers
+                    await newNumArray.splice(this.state.exponentList[index], 2, newNum)
+                    console.log(this.state.exponentList[index])
+                    console.log(newNumArray);
+                    await this.setState({
+                        numbers: await newNumArray
+                    })
                 }
-            });
+                catch(err){
+                    console.log(err)
+                }
+            };
+            this.setState({
+                exponentList: []
+            })
             let val = this.state.nonNumbers.length;
             let moved = 0;
+            if(val > 0){
+
             for(let index = 0; index < val; index++){            
                 let more = this.state.nonNumbers.includes("*") || this.state.nonNumbers.includes("/") || this.state.nonNumbers.includes("%")
                 let array = this.state.numbers;
@@ -206,7 +226,6 @@ export default class Calculator extends Component {
 
 
             let val2 = this.state.nonNumbers.length;
-            moved = 0;
             for(let index = 0; index < val2; index++){
                 let array = this.state.numbers;
                 if("+" === this.state.nonNumbers[0]){
@@ -227,10 +246,13 @@ export default class Calculator extends Component {
                     })
                 }
             }
+        }
+        else{
 
-            return await this.setState({
-                equation: this.state.numbers,
-                currentNumber: this.state.numbers,
+        }
+            return this.setState({
+                equation: await this.state.numbers,
+                currentNumber: await this.state.numbers,
                 numbers: []
             })
         }
