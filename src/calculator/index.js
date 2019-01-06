@@ -8,9 +8,10 @@ export default class Calculator extends Component {
         this.state = {
                 openP: "[",
                 closeP: "]",
-                E: ["**2","**3"],
                 MD: ["*","/","%"],
                 AS: ["-","+"],
+                exponentUsed: false,
+                operatorUsed: false,
                 equation:"",
                 currentNumber: "",
                 decimal: ".",
@@ -33,13 +34,29 @@ export default class Calculator extends Component {
         if(isNaN(e.currentTarget.value) && (
         (this.state.MD.includes(e.currentTarget.value) ||
         this.state.AS.includes(e.currentTarget.value)) && 
-        (this.state.numbers.length - this.state.nonNumbers.length >= 0))){
+        this.state.currentNumber !== ""
+        )){
             this.setState({
                 equation: this.state.equation + e.currentTarget.value,
-                nonNumbers: [...this.state.nonNumbers, e.currentTarget.value]
+                nonNumbers: [...this.state.nonNumbers, e.currentTarget.value],
+                operatorUsed: true
+
             })
             this.NewNumber()
-        } 
+        }
+        else if(isNaN(e.currentTarget.value) && 
+        ((this.state.MD.includes(e.currentTarget.value) ||
+        this.state.AS.includes(e.currentTarget.value)) && 
+        this.state.currentNumber === "" && 
+        this.state.exponentUsed
+        )){
+            this.setState({
+                equation: this.state.equation + e.currentTarget.value,
+                nonNumbers: [...this.state.nonNumbers, e.currentTarget.value],
+                exponentUsed: false,
+                operatorUsed: true
+            })
+        }
 
         else if(e.currentTarget.value === "." && 
         decIncluded === false){
@@ -56,11 +73,40 @@ export default class Calculator extends Component {
             return true;
         }
 
+        else if(this.state.exponentUsed === false){
+            if(e.currentTarget.value ===  "3.14159265359"){
+                if(this.state.currentNumber !== ""){
+
+                    this.setState({
+                        equation: this.state.equation + "*π",
+                        numbers:  [...this.state.numbers, parseFloat(e.currentTarget.value)],
+                        nonNumbers: [...this.state.nonNumbers + "*"],
+                        currentNumber: "",
+                        operatorUsed: false,
+                        exponentUsed: false
+                    })
+                }
+                else{
+                    this.setState({
+                        equation: this.state.equation + "π",
+                        numbers:  [...this.state.numbers, parseFloat(e.currentTarget.value)],
+                        currentNumber: "",
+                        operatorUsed: false,
+                        exponentUsed: false
+                    })
+                }
+            }
+            else{
+                this.setState({
+                    equation: this.state.equation + e.currentTarget.value,
+                    currentNumber: this.state.currentNumber + e.currentTarget.value,
+                    operatorUsed: false
+                    
+                })
+            }
+        }
         else{
-            this.setState({
-                equation: this.state.equation + e.currentTarget.value,
-                currentNumber: this.state.currentNumber + e.currentTarget.value
-            })
+            return
         }
     }
     
@@ -107,18 +153,27 @@ export default class Calculator extends Component {
             equation: "",
             currentNumber: "",
             numbers: [],
-            nonNumbers: []
+            nonNumbers: [],
+            exponentList:[],
+            exponentUsed: false,
+            operatorUsed: false
         })
      }
 
-     exponent = async() =>{
+     exponent = async(e) =>{
         try{ 
-            this.setState({
-                exponentList: await [...this.state.exponentList, this.state.numbers.length],
-                equation: this.state.equation + "²"
-            })
-            console.log(this.state.exponentList)
-            this.NewNumber();
+            if(this.state.operatorUsed === false && this.state.exponentUsed === false){
+                await this.NewNumber();
+                this.setState({
+                    exponentList: await [...this.state.exponentList, this.state.numbers.length - 1],
+                    equation: this.state.equation + "²",
+                    exponentUsed: true
+                })
+                
+            }
+            else{
+                return
+            }
         }
         catch(err){
             console.log(err)
@@ -136,10 +191,10 @@ export default class Calculator extends Component {
 
     NewNumber = async() => {
         try{
-           this.setState({
-             numbers: await [...this.state.numbers, parseFloat(this.state.currentNumber)],
-             currentNumber: ""
-           })
+            this.setState({
+                numbers: await [...this.state.numbers, parseFloat(this.state.currentNumber)],
+                currentNumber: ""
+            })
         }
         catch(err){
             console.log(err)
@@ -149,11 +204,16 @@ export default class Calculator extends Component {
 
     preSolve = async() =>{
         try{
-            await this.setState({
-                numbers: [...this.state.numbers, parseFloat(this.state.currentNumber)],
-                currentNumber: ""
-            })
-            this.solve()
+            if(this.state.currentNumber !== ""){
+                await this.setState({
+                    numbers: [...this.state.numbers, parseFloat(this.state.currentNumber)],
+                    currentNumber: ""
+                })
+                this.solve()
+            }
+            else{
+                this.solve()
+            }
         }
         catch(err){
             console.log(err)
@@ -164,14 +224,17 @@ export default class Calculator extends Component {
     solve = async() => {
         try{
             for(let index = 0; index < this.state.exponentList.length; index++){
+                
                 try{
                     let newNum = this.state.numbers[this.state.exponentList[index]] ** 2
-                    let newNumArray = this.state.numbers
-                    await newNumArray.splice(this.state.exponentList[index], 2, newNum)
-                    console.log(this.state.exponentList[index])
-                    console.log(newNumArray);
+                    let newNumArray = [...this.state.numbers]
+                        await newNumArray.splice(this.state.exponentList[index], 1, newNum)
+                   
+                        await newNumArray.splice(this.state.exponentList[index], 1, newNum)
+                    
+                    
                     await this.setState({
-                        numbers: await newNumArray
+                        numbers: newNumArray
                     })
                 }
                 catch(err){
@@ -253,7 +316,9 @@ export default class Calculator extends Component {
             return this.setState({
                 equation: await this.state.numbers,
                 currentNumber: await this.state.numbers,
-                numbers: []
+                numbers: [],
+                exponentUsed: false,
+                operatorUsed: false
             })
         }
         catch(err){
@@ -271,37 +336,40 @@ export default class Calculator extends Component {
                   <Form.Input onChange={this.handleTypeInput} value={this.state.equation} type="text"/>
                     <Grid columns={4}>
                       <Grid.Row>
-                          <Button value="=" onClick={this.preSolve} className="asdf">=</Button>
-                          <Button value="C" onClick={this.clear} className="asdf">C</Button>
+                          <Button value="=" onClick={this.preSolve}>=</Button>
+                          <Button value="C" onClick={this.clear}>C</Button>
                           <Button value="x²" onClick={this.exponent}>x²</Button>
+                          {/* <Button value=" √" onClick={this.exponent}> √</Button> */}
+
                       </Grid.Row>
                       <Grid.Row>
-                      <Button value="9" onClick={this.handleInput}>9</Button>
-                      <Button value="8" onClick={this.handleInput}>8</Button>
-                      <Button value="7" onClick={this.handleInput}>7</Button>
-                      <Button value="%" onClick={this.handleInput}>%</Button>
+                          <Button value="9" onClick={this.handleInput}>9</Button>
+                          <Button value="8" onClick={this.handleInput}>8</Button>
+                          <Button value="7" onClick={this.handleInput}>7</Button>
+                          <Button value="/" onClick={this.handleInput}>/</Button>
+
+                          
                       </Grid.Row>
                       <Grid.Row>
-                      <Button value="6" onClick={this.handleInput}>6</Button>
-                      <Button value="5" onClick={this.handleInput}>5</Button>
-                      <Button value="4" onClick={this.handleInput}>4</Button>
-                      <Button value="/" onClick={this.handleInput}>/</Button>
- 
+                          <Button value="6" onClick={this.handleInput}>6</Button>
+                          <Button value="5" onClick={this.handleInput}>5</Button>
+                          <Button value="4" onClick={this.handleInput}>4</Button>
+                          <Button value="*" onClick={this.handleInput}>*</Button>
+
                       </Grid.Row>
                       <Grid.Row>
-                      <Button value="3" onClick={this.handleInput}>3</Button>
-                      <Button value="2" onClick={this.handleInput}>2</Button>
-                      <Button value="1" onClick={this.handleInput}>1</Button>
-                      <Button value="*" onClick={this.handleInput}>*</Button>
+                          <Button value="3" onClick={this.handleInput}>3</Button>
+                          <Button value="2" onClick={this.handleInput}>2</Button>
+                          <Button value="1" onClick={this.handleInput}>1</Button>
+                          <Button value="+" onClick={this.handleInput}>+</Button>
                       </Grid.Row>
                       <Grid.Row>
-                      <Button value="." onClick={this.handleInput}>.</Button>
-                      <Button value="0" onClick={this.handleInput}>0</Button>
-                      <Button value="+" onClick={this.handleInput}>+</Button>
-                      <Button value="-" onClick={this.handleInput}>-</Button>
-                      
+                          <Button value="3.14159265359" onClick={this.handleInput}>π</Button>
+                          <Button value="0" onClick={this.handleInput}>0</Button>
+                          <Button value="." onClick={this.handleInput}>.</Button>
+                          <Button value="-" onClick={this.handleInput}>—</Button>
                       </Grid.Row>
-                       </Grid>
+                    </Grid>
                 </Form>
             </div>
         )
