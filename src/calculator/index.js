@@ -12,6 +12,7 @@ export default class Calculator extends Component {
                 AS: ["-","+"],
                 exponentUsed: false,
                 operatorUsed: false,
+                decimalUsed: false,
                 equation:"",
                 currentNumber: "",
                 decimal: ".",
@@ -34,7 +35,9 @@ export default class Calculator extends Component {
         if(isNaN(e.currentTarget.value) && (
         (this.state.MD.includes(e.currentTarget.value) ||
         this.state.AS.includes(e.currentTarget.value)) && 
-        this.state.currentNumber !== ""
+        this.state.currentNumber !== "" &&
+        this.state.operatorUsed === false &&
+        this.state.decimalUsed === false
         )){
             this.setState({
                 equation: this.state.equation + e.currentTarget.value,
@@ -42,13 +45,14 @@ export default class Calculator extends Component {
                 operatorUsed: true
 
             })
-            this.NewNumber()
+            this.NewNumber();
         }
         else if(isNaN(e.currentTarget.value) && 
         ((this.state.MD.includes(e.currentTarget.value) ||
         this.state.AS.includes(e.currentTarget.value)) && 
         this.state.currentNumber === "" && 
-        this.state.exponentUsed
+        this.state.exponentUsed &&
+        this.state.decimalUsed === false
         )){
             this.setState({
                 equation: this.state.equation + e.currentTarget.value,
@@ -56,6 +60,7 @@ export default class Calculator extends Component {
                 exponentUsed: false,
                 operatorUsed: true
             })
+            this.NewNumber();
         }
 
         else if(e.currentTarget.value === "." && 
@@ -73,7 +78,7 @@ export default class Calculator extends Component {
             return true;
         }
 
-        else if(this.state.exponentUsed === false){
+        else if(this.state.operatorUsed === false){
             if(e.currentTarget.value ===  "3.14159265359"){
                 if(this.state.currentNumber !== ""){
 
@@ -83,7 +88,8 @@ export default class Calculator extends Component {
                         nonNumbers: [...this.state.nonNumbers + "*"],
                         currentNumber: "",
                         operatorUsed: false,
-                        exponentUsed: false
+                        exponentUsed: false,
+                        decimalUsed: false
                     })
                 }
                 else{
@@ -92,7 +98,8 @@ export default class Calculator extends Component {
                         numbers:  [...this.state.numbers, parseFloat(e.currentTarget.value)],
                         currentNumber: "",
                         operatorUsed: false,
-                        exponentUsed: false
+                        exponentUsed: false,
+                        decimalUsed: false
                     })
                 }
             }
@@ -100,7 +107,8 @@ export default class Calculator extends Component {
                 this.setState({
                     equation: this.state.equation + e.currentTarget.value,
                     currentNumber: this.state.currentNumber + e.currentTarget.value,
-                    operatorUsed: false
+                    operatorUsed: false,
+                    decimalUsed: false
                     
                 })
             }
@@ -163,13 +171,20 @@ export default class Calculator extends Component {
      exponent = async(e) =>{
         try{ 
             if(this.state.operatorUsed === false && this.state.exponentUsed === false){
+                if(this.state.currentNumber !== ""){
                 await this.NewNumber();
-                this.setState({
-                    exponentList: await [...this.state.exponentList, this.state.numbers.length - 1],
-                    equation: this.state.equation + "²",
-                    exponentUsed: true
-                })
-                
+                    this.setState({
+                        exponentList: await [...this.state.exponentList, this.state.numbers.length - 1],
+                        equation: this.state.equation + "²",
+                        exponentUsed: true
+                    })
+                }
+                else{
+                    this.setState({
+                        exponentList: await [...this.state.exponentList, this.state.numbers.length - 1],
+                        equation: this.state.equation + "²"
+                    })
+                }
             }
             else{
                 return
@@ -182,10 +197,20 @@ export default class Calculator extends Component {
 
 
     addDecimal = (e) => {
-        this.setState({
-            currentNumber: this.state.currentNumber + ".",
-            equation: this.state.equation + "."
-        })
+        if(this.state.currentNumber.length < 1){
+            this.setState({
+                currentNumber: this.state.currentNumber + ".",
+                equation: this.state.equation + ".",
+                decimalUsed: true
+            })
+        }
+        else{
+            this.setState({
+                currentNumber: this.state.currentNumber + ".",
+                equation: this.state.equation + ".",
+                decimalUsed: false
+            })
+        }
     }
 
 
