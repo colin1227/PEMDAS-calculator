@@ -10,12 +10,14 @@ export default class Calculator extends Component {
                 closeP: "]",
                 MD: ["*","/","%"],
                 AS: ["-","+"],
+                decimal: ".",
                 exponentUsed: false,
                 operatorUsed: false,
-                decimalUsed: false,
+                justDecimalUsed: false,
+        
                 equation:"",
                 currentNumber: "",
-                decimal: ".",
+                
                 numbers: [],
                 nonNumbers: [],
                 exponentList: []
@@ -29,7 +31,8 @@ export default class Calculator extends Component {
     }
 
 
-    handleInput = (e) =>{
+    handleInput = async(e) =>{
+        try{
         let decIncluded = this.state.currentNumber.includes(".")
         
         if(isNaN(e.currentTarget.value) && (
@@ -37,34 +40,56 @@ export default class Calculator extends Component {
         this.state.AS.includes(e.currentTarget.value)) && 
         this.state.currentNumber !== "" &&
         this.state.operatorUsed === false &&
-        this.state.decimalUsed === false
+        this.state.justDecimalUsed === false
         )){
-            this.setState({
-                equation: this.state.equation + e.currentTarget.value,
-                nonNumbers: [...this.state.nonNumbers, e.currentTarget.value],
-                operatorUsed: true
-
-            })
-            this.NewNumber();
+            if(this.state.currentNumber !== ""){
+                this.setState({
+                    equation: this.state.equation + e.currentTarget.value,
+                    nonNumbers: [...this.state.nonNumbers, e.currentTarget.value],
+                    operatorUsed: true
+                })
+                this.NewNumber();
+            }
+            else{
+                this.setState({
+                    equation: this.state.equation + e.currentTarget.value,
+                    nonNumbers: [...this.state.nonNumbers, e.currentTarget.value],
+                    operatorUsed: true
+                }) 
+            }
         }
         else if(isNaN(e.currentTarget.value) && 
         ((this.state.MD.includes(e.currentTarget.value) ||
         this.state.AS.includes(e.currentTarget.value)) && 
         this.state.currentNumber === "" && 
         this.state.exponentUsed &&
-        this.state.decimalUsed === false
+        this.state.justDecimalUsed === false
         )){
-            this.setState({
-                equation: this.state.equation + e.currentTarget.value,
-                nonNumbers: [...this.state.nonNumbers, e.currentTarget.value],
-                exponentUsed: false,
-                operatorUsed: true
-            })
-            this.NewNumber();
+            if(this.state.currentNumber !== ""){
+                this.setState({
+                    equation: this.state.equation + e.currentTarget.value,
+                    nonNumbers: [...this.state.nonNumbers, e.currentTarget.value],
+                    exponentUsed: false,
+                    operatorUsed: true,
+                    justDecimalUsed: false
+                })
+                this.NewNumber();
+            }
+            else{
+                this.setState({
+                    equation: this.state.equation + e.currentTarget.value,
+                    nonNumbers: [...this.state.nonNumbers, e.currentTarget.value],
+                    exponentUsed: false,
+                    operatorUsed: true,
+                    justDecimalUsed: false
+                })
+            }
         }
 
         else if(e.currentTarget.value === "." && 
-        decIncluded === false){
+        decIncluded === false && 
+        this.state.justDecimalUsed === false &&
+        this.state.exponentUsed === false){
             this.addDecimal()
         }
 
@@ -78,28 +103,29 @@ export default class Calculator extends Component {
             return true;
         }
 
-        else if(this.state.operatorUsed === false){
+        else if((this.state.operatorUsed === false || 
+            this.state.currentNumber === "") &&
+            this.state.exponentUsed === false){
             if(e.currentTarget.value ===  "3.14159265359"){
                 if(this.state.currentNumber !== ""){
-
                     this.setState({
                         equation: this.state.equation + "*π",
-                        numbers:  [...this.state.numbers, parseFloat(e.currentTarget.value)],
+                        numbers: [...this.state.numbers, parseFloat(this.state.currentNumber),3.14159265359],
                         nonNumbers: [...this.state.nonNumbers + "*"],
-                        currentNumber: "",
                         operatorUsed: false,
                         exponentUsed: false,
-                        decimalUsed: false
+                        justDecimalUsed: true,
+                        currentNumber: ""
                     })
                 }
-                else{
+                else if(decIncluded === false){
                     this.setState({
                         equation: this.state.equation + "π",
-                        numbers:  [...this.state.numbers, parseFloat(e.currentTarget.value)],
+                        numbers:  [...this.state.numbers, 3.14159265359],
                         currentNumber: "",
                         operatorUsed: false,
                         exponentUsed: false,
-                        decimalUsed: false
+                        justDecimalUsed: true
                     })
                 }
             }
@@ -108,7 +134,7 @@ export default class Calculator extends Component {
                     equation: this.state.equation + e.currentTarget.value,
                     currentNumber: this.state.currentNumber + e.currentTarget.value,
                     operatorUsed: false,
-                    decimalUsed: false
+                    justDecimalUsed: false
                     
                 })
             }
@@ -116,6 +142,10 @@ export default class Calculator extends Component {
         else{
             return
         }
+      }
+      catch(err){
+          console.log("err", err)
+      }
     }
     
 
@@ -164,7 +194,8 @@ export default class Calculator extends Component {
             nonNumbers: [],
             exponentList:[],
             exponentUsed: false,
-            operatorUsed: false
+            operatorUsed: false,
+            justDecimalUsed: false
         })
      }
 
@@ -176,13 +207,16 @@ export default class Calculator extends Component {
                     this.setState({
                         exponentList: await [...this.state.exponentList, this.state.numbers.length - 1],
                         equation: this.state.equation + "²",
-                        exponentUsed: true
+                        exponentUsed: true,
+                        operatorUsed: false
                     })
                 }
                 else{
                     this.setState({
                         exponentList: await [...this.state.exponentList, this.state.numbers.length - 1],
-                        equation: this.state.equation + "²"
+                        equation: this.state.equation + "²",
+                        exponentUsed: true,
+                        operatorUsed: false
                     })
                 }
             }
@@ -201,14 +235,16 @@ export default class Calculator extends Component {
             this.setState({
                 currentNumber: this.state.currentNumber + ".",
                 equation: this.state.equation + ".",
-                decimalUsed: true
+                justDecimalUsed: true,
+                operatorUsed: false
             })
         }
         else{
             this.setState({
                 currentNumber: this.state.currentNumber + ".",
                 equation: this.state.equation + ".",
-                decimalUsed: false
+                justDecimalUsed: false,
+                operatorUsed: false
             })
         }
     }
@@ -343,7 +379,8 @@ export default class Calculator extends Component {
                 currentNumber: await this.state.numbers,
                 numbers: [],
                 exponentUsed: false,
-                operatorUsed: false
+                operatorUsed: false,
+                justDecimalUsed: false
             })
         }
         catch(err){
