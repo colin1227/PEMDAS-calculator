@@ -33,160 +33,132 @@ export default class Calculator extends Component {
 
     handleInput = async(e) =>{
         try{
-        let decIncluded = this.state.currentNumber.includes(".")
+            // checks for decimals
+            let decIncluded = this.state.currentNumber.includes(".")
         
-        if(isNaN(e.currentTarget.value) && (
-        (this.state.MD.includes(e.currentTarget.value) ||
-        this.state.AS.includes(e.currentTarget.value)) && 
-        this.state.currentNumber !== "" &&
-        this.state.operatorUsed === false &&
-        this.state.justDecimalUsed === false
-        )){
-            if(this.state.currentNumber !== ""){
+            // if the value is not a number and 
+            // the value is *, /, + or - and
+            // states currentNumber isn't nothing and
+            // an operator hasn't been used and
+            // there isnt just a decimal in states currentNumber THEN
+            // the value is added to states nonNumbers
+            if(isNaN(e.currentTarget.value) && (
+            (this.state.MD.includes(e.currentTarget.value) ||
+            this.state.AS.includes(e.currentTarget.value)) && 
+            this.state.currentNumber !== "" &&
+            this.state.operatorUsed === false &&
+            this.state.justDecimalUsed === false)){ 
                 this.setState({
                     equation: this.state.equation + e.currentTarget.value,
                     nonNumbers: [...this.state.nonNumbers, e.currentTarget.value],
                     operatorUsed: true
                 })
-                this.NewNumber();
+                this.NewNumber();     
             }
-            else{
-                this.setState({
-                    equation: this.state.equation + e.currentTarget.value,
-                    nonNumbers: [...this.state.nonNumbers, e.currentTarget.value],
-                    operatorUsed: true
-                }) 
-            }
-        }
-        else if(isNaN(e.currentTarget.value) && 
-        ((this.state.MD.includes(e.currentTarget.value) ||
-        this.state.AS.includes(e.currentTarget.value)) && 
-        this.state.currentNumber === "" && 
-        this.state.exponentUsed &&
-        this.state.justDecimalUsed === false
-        )){
-            if(this.state.currentNumber !== ""){
+
+            // if the value is not a number and 
+            // the value is *, /, + or - and
+            // states currentNumber is something and
+            // an exponent has been used and
+            // an operator hasn't been used and
+            // there isnt just a decimal in states currentNumber THEN
+            // the value is added to states nonNumbers
+            else if(isNaN(e.currentTarget.value) && 
+            ((this.state.MD.includes(e.currentTarget.value) ||
+            this.state.AS.includes(e.currentTarget.value)) && 
+            this.state.currentNumber === "" && 
+            this.state.exponentUsed &&
+            this.state.operatorUsed === false &&
+            this.state.justDecimalUsed === false)){
                 this.setState({
                     equation: this.state.equation + e.currentTarget.value,
                     nonNumbers: [...this.state.nonNumbers, e.currentTarget.value],
                     exponentUsed: false,
                     operatorUsed: true,
                     justDecimalUsed: false
-                })
-                this.NewNumber();
-            }
-            else{
-                this.setState({
-                    equation: this.state.equation + e.currentTarget.value,
-                    nonNumbers: [...this.state.nonNumbers, e.currentTarget.value],
-                    exponentUsed: false,
-                    operatorUsed: true,
-                    justDecimalUsed: false
-                })
-            }
-        }
+                })     
+            }   
 
-        else if(e.currentTarget.value === "." && 
-        decIncluded === false && 
-        this.state.justDecimalUsed === false &&
-        this.state.exponentUsed === false){
-            this.addDecimal()
-        }
-
-        else if(isNaN(e.currentTarget.value) && 
-        ((this.state.MD.includes(e.currentTarget.value) === false ||
-        this.state.AS.includes(e.currentTarget.value) === false) 
-          ||
-        (this.state.currentNumber === "" && 
-        (this.state.MD.includes(e.currentTarget.value) === true ||
-        this.state.AS.includes(e.currentTarget.value) === true))) ){
-            return true;
-        }
-
-        else if((this.state.operatorUsed === false || 
-            this.state.currentNumber === "") &&
+            // if value is a decimal and 
+            // a decimal hasn't been used yet and
+            // and a exponent hasn't been used THEN
+            // a decimal is added
+            else if(e.currentTarget.value === "." && 
+            decIncluded === false && 
             this.state.exponentUsed === false){
-            if(e.currentTarget.value ===  "3.14159265359"){
-                if(this.state.currentNumber !== ""){
-                    this.setState({
-                        equation: this.state.equation + "*π",
-                        numbers: [...this.state.numbers, parseFloat(this.state.currentNumber),3.14159265359],
-                        nonNumbers: [...this.state.nonNumbers + "*"],
-                        operatorUsed: false,
-                        exponentUsed: false,
-                        justDecimalUsed: true,
-                        currentNumber: ""
-                    })
-                }
-                else if(decIncluded === false){
-                    this.setState({
-                        equation: this.state.equation + "π",
-                        numbers:  [...this.state.numbers, 3.14159265359],
-                        currentNumber: "",
-                        operatorUsed: false,
-                        exponentUsed: false,
-                        justDecimalUsed: true
-                    })
-                }
+                this.addDecimal()
             }
-            else{
-                this.setState({
-                    equation: this.state.equation + e.currentTarget.value,
-                    currentNumber: this.state.currentNumber + e.currentTarget.value,
-                    operatorUsed: false,
-                    justDecimalUsed: false
+
+            // if value is anyting other than a number and
+            // the value is not an opperator OR
+            // there is no current number and 
+            // value is an opperator THEN
+            // nothing happens
+            else if(isNaN(e.currentTarget.value) && 
+            ((this.state.MD.includes(e.currentTarget.value) === false ||
+            this.state.AS.includes(e.currentTarget.value) === false) 
+            ||
+            (this.state.currentNumber === "" && 
+            (this.state.MD.includes(e.currentTarget.value) === true ||
+            this.state.AS.includes(e.currentTarget.value) === true))) ){
+                return true;
+            }
+
+            // if a operator hasn't been used or
+            // nothing is in states currentNumber
+            else if((this.state.operatorUsed === false || 
+                this.state.currentNumber === "") &&
+                this.state.exponentUsed === false){
+                    // if value is pi
+                    if(e.currentTarget.value ===  "3.14159265359"){
+                        // no decimals have been used and an operator has been used
+                        // pi is added to eqation, the actual number is added to states numbers
+                        // and states currentNumber is set to nothing. Also
+                        // operatorUsed isset to false,
+                        // exponentused is set to false and
+                        // justDecimalUsed is also set to false
+                        if(decIncluded === false && this.state.operatorUsed === true){
+                            this.setState({
+                                equation: this.state.equation + "π",
+                                numbers:  [...this.state.numbers, 3.14159265359],
+                                currentNumber: "",
+                                operatorUsed: false,
+                                exponentUsed: false,
+                                justDecimalUsed: false
+                            })
+                        }
+                    }
+                    // if value is a number 0-9 value is added to
+                    // states equation and currentNumber and you can now use
+                    // an operator and justDecimal is set to false
+                    else{
+                        this.setState({
+                            equation: this.state.equation + e.currentTarget.value,
+                            currentNumber: this.state.currentNumber + e.currentTarget.value,
+                            operatorUsed: false,
+                            justDecimalUsed: false
                     
-                })
+                        })
+                    }
+                }
+            else{
+                return
             }
         }
-        else{
-            return
+        catch(err){
+            console.log("err", err)
         }
-      }
-      catch(err){
-          console.log("err", err)
-      }
     }
     
 
     handleTypeInput = (e) =>{
-        // const decIncluded = this.state.currentNumber.includes(".")
-        // if(isNaN(e.currentTarget.value) && 
-        // (this.state.MD.includes(e.currentTarget.value) ||
-        // this.state.AS.includes(e.currentTarget.value))){
-            
-        //     this.setState({
-        //         equation: this.state.equation + e.currentTarget.value,
-        //         nonNumbers: [...this.state.nonNumbers, e.currentTarget.value]
-        //     })
-        //     this.NewNumber()
-        // } 
-
-        // else if(isNaN(e.currentTarget.value) && 
-        // ((this.state.P.includes(e.currentTarget.value) === false || 
-        // this.state.MD.includes(e.currentTarget.value) === false ||
-        // this.state.AS.includes(e.currentTarget.value) === false) 
-        //   ||
-        // (this.state.currentNumber === "" && 
-        // (this.state.MD.includes(e.currentTarget.value) === true ||
-        // this.state.AS.includes(e.currentTarget.value) === true)))){
-        //     return true;
-        // }
-        // else if(e.currentTarget.value === "." && 
-        // this.state.currentNumber !== "" &&
-        // decIncluded === false){
-        //     this.addDecimal()
-        // }
-        // else{
-        //     this.setState({
-        //         equation: e.currentTarget.value,
-        //         currentNumber: e.currentTarget.value
-        //     })
-        // }
+        // a lot more work to figure out how to make this work so it 
+        // is blank for now to prevent crashes.
     }
 
 
     clear = () => {
+        // erases everything from mutable state.
         this.setState({
             equation: "",
             currentNumber: "",
@@ -231,6 +203,9 @@ export default class Calculator extends Component {
 
 
     addDecimal = (e) => {
+        // if there is nothing in states currentNumber a decimal is added 
+        // and justDeciamalUsed is set to true to prevent just a decimal being
+        // added as a number.
         if(this.state.currentNumber.length < 1){
             this.setState({
                 currentNumber: this.state.currentNumber + ".",
@@ -252,6 +227,8 @@ export default class Calculator extends Component {
 
     NewNumber = async() => {
         try{
+            // adds states currentNumber to numbers after being parsed 
+            // and sets currentNumber empty again.
             this.setState({
                 numbers: await [...this.state.numbers, parseFloat(this.state.currentNumber)],
                 currentNumber: ""
@@ -265,13 +242,15 @@ export default class Calculator extends Component {
 
     preSolve = async() =>{
         try{
+            // adds last number thats in states currentNumber to  states numbers.
             if(this.state.currentNumber !== ""){
                 await this.setState({
-                    numbers: [...this.state.numbers, parseFloat(this.state.currentNumber)],
+                    numbers: [...this.state.numbers, await parseFloat(this.state.currentNumber)],
                     currentNumber: ""
                 })
                 this.solve()
             }
+            // if nothing is in states currentNumber solve function is run.
             else{
                 this.solve()
             }
@@ -284,15 +263,13 @@ export default class Calculator extends Component {
 
     solve = async() => {
         try{
+            // takes care of exponents
             for(let index = 0; index < this.state.exponentList.length; index++){
                 
                 try{
                     let newNum = this.state.numbers[this.state.exponentList[index]] ** 2
                     let newNumArray = [...this.state.numbers]
-                        await newNumArray.splice(this.state.exponentList[index], 1, newNum)
-                   
-                        await newNumArray.splice(this.state.exponentList[index], 1, newNum)
-                    
+                        await newNumArray.splice(this.state.exponentList[index], 1, newNum)                    
                     
                     await this.setState({
                         numbers: newNumArray
@@ -308,15 +285,16 @@ export default class Calculator extends Component {
             let val = this.state.nonNumbers.length;
             let moved = 0;
             if(val > 0){
-
-            for(let index = 0; index < val; index++){            
-                let more = this.state.nonNumbers.includes("*") || this.state.nonNumbers.includes("/") || this.state.nonNumbers.includes("%")
+            // solves for Multiplication and Division 
+            for(let index = 0; index < val; index++){  
+                console.log(this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved])])          
+                //let more = this.state.nonNumbers.includes("*") || this.state.nonNumbers.includes("/") || this.state.nonNumbers.includes("%")
                 let array = this.state.numbers;
                 if("*" === this.state.nonNumbers[0 + moved] ){
                     let value = this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved])] * this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved])+ 1]
                     let removedIndex = await this.state.numbers.indexOf(this.state.numbers[moved], moved)
                     await array.splice(removedIndex, 2, value)
-                    await this.state.nonNumbers.shift()
+                    await this.state.nonNumbers.splice(removedIndex, 1)
                     await this.setState({
                         numbers: [...array]
                     })
@@ -328,31 +306,23 @@ export default class Calculator extends Component {
                     let value = this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved])] / this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved]) + 1]
                     let removedIndex = await this.state.numbers.indexOf(this.state.numbers[moved], moved)
                     await array.splice(removedIndex, 2, value)
-                    await this.state.nonNumbers.shift()
+                    await this.state.nonNumbers.splice(removedIndex, 1)                    
                     await this.setState({
                         numbers: [...array]
                     })
                 }
 
-                else if("%" === this.state.nonNumbers[0 + moved]){
-                    let value = this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved])] % this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved]) + 1]
-                    let removedIndex = await this.state.numbers.indexOf(this.state.numbers[moved], moved)
-                    await array.splice(removedIndex, 2, value)
-                    await this.state.nonNumbers.shift()
-                    await this.setState({
-                        numbers: [...array]
-                    })
-                }
-                else if(more === false){
+                else if(this.state.nonNumbers[0 + moved] !== "*" && this.state.nonNumbers[0 + moved] !== "/"){
                     moved++;
                 }
             }
 
 
             let val2 = this.state.nonNumbers.length;
+            // solves for Additon and Multiplication
             for(let index = 0; index < val2; index++){
                 let array = this.state.numbers;
-                if("+" === this.state.nonNumbers[0]){
+                if(this.state.nonNumbers[0] === "+"){
                     let value = this.state.numbers[0] + this.state.numbers[1];
                     await array.splice(0, 2, value)
                     await this.state.nonNumbers.shift()
@@ -372,8 +342,9 @@ export default class Calculator extends Component {
             }
         }
         else{
-
+            // Nada thing here
         }
+            // Final number is set to equation and currentNumber is set the final number
             return this.setState({
                 equation: await this.state.numbers,
                 currentNumber: await this.state.numbers,
@@ -392,8 +363,8 @@ export default class Calculator extends Component {
     render() {
         return(
             <div>
-                <b>numbers: {this.state.numbers}</b>
-                <b> current number: {this.state.currentNumber}</b>
+                {/* <b>numbers: {this.state.numbers}</b>
+                <b> current number: {this.state.currentNumber}</b> */}
                 <Form>
                   <Form.Input onChange={this.handleTypeInput} value={this.state.equation} type="text"/>
                     <Grid columns={4}>
