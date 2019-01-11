@@ -243,9 +243,9 @@ export default class Calculator extends Component {
     preSolve = async() =>{
         try{
             // adds last number thats in states currentNumber to  states numbers.
-            if(this.state.currentNumber !== ""){
+            if(this.state.currentNumber !== "" && this.state.justDecimalUsed === false){
                 await this.setState({
-                    numbers: [...this.state.numbers, await parseFloat(this.state.currentNumber)],
+                    numbers: [...this.state.numbers, parseFloat(this.state.currentNumber)],
                     currentNumber: ""
                 })
                 this.solve()
@@ -287,8 +287,6 @@ export default class Calculator extends Component {
             if(val > 0){
             // solves for Multiplication and Division 
             for(let index = 0; index < val; index++){  
-                console.log(this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved])])          
-                //let more = this.state.nonNumbers.includes("*") || this.state.nonNumbers.includes("/") || this.state.nonNumbers.includes("%")
                 let array = this.state.numbers;
                 if("*" === this.state.nonNumbers[0 + moved] ){
                     let value = this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved])] * this.state.numbers[this.state.nonNumbers.indexOf(this.state.nonNumbers[0 + moved])+ 1]
@@ -363,8 +361,6 @@ export default class Calculator extends Component {
     render() {
         return(
             <div>
-                {/* <b>numbers: {this.state.numbers}</b>
-                <b> current number: {this.state.currentNumber}</b> */}
                 <Form>
                   <Form.Input onChange={this.handleTypeInput} value={this.state.equation} type="text"/>
                     <Grid columns={4}>
@@ -372,7 +368,6 @@ export default class Calculator extends Component {
                           <Button value="=" onClick={this.preSolve}>=</Button>
                           <Button value="C" onClick={this.clear}>C</Button>
                           <Button value="x²" onClick={this.exponent}>x²</Button>
-                          {/* <Button value=" √" onClick={this.exponent}> √</Button> */}
 
                       </Grid.Row>
                       <Grid.Row>
