@@ -6,4 +6,5 @@
 
 .goAway {
   display: none;
+  opacity: 0;
 }

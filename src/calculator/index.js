@@ -372,7 +372,7 @@ export default class Calculator extends Component {
                           <Button value="=" className="center" onClick={this.preSolve}>=</Button>
                           <Button value="C" onClick={this.clear}>C</Button>
                           <Button value="x²" onClick={this.exponent}>x²</Button>
-                          <Button value="r"  className="goAway"></Button>
+                          <Button value="r" className="goAway"></Button>
 
                       </Grid.Row>
                       <Grid.Row>
