@@ -1,4 +1,9 @@
-.asdf {
-    padding: 60px;
-    background-color: aqua;
-  }
+
+.width {
+  width: 250px;
+  display: inline-block;
+}
+
+.goAway {
+  display: none;
+}

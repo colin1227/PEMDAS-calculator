@@ -361,13 +361,18 @@ export default class Calculator extends Component {
     render() {
         return(
             <div>
+                <h1>Colin's Calculator</h1>
+                <br/>
+                <br/>
+                <br/>
                 <Form>
-                  <Form.Input onChange={this.handleTypeInput} value={this.state.equation} type="text"/>
-                    <Grid columns={4}>
+                  <Form.Input className="width" onChange={this.handleTypeInput} value={this.state.equation} type="text"/>
+                    <Grid centered columns={4}>
                       <Grid.Row>
-                          <Button value="=" onClick={this.preSolve}>=</Button>
+                          <Button value="=" className="center" onClick={this.preSolve}>=</Button>
                           <Button value="C" onClick={this.clear}>C</Button>
                           <Button value="x²" onClick={this.exponent}>x²</Button>
+                          <Button value="r"  className="goAway"></Button>
 
                       </Grid.Row>
                       <Grid.Row>
